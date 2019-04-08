@@ -3,6 +3,7 @@ package com.example.cyd.albummanager.adapter;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,19 +18,25 @@ import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * Created by cyd on 19-4-8.
  */
 
 public class GridImageAdapter extends RecyclerView.Adapter {
-
+    private static final String TAG = GridImageAdapter.class.getSimpleName();
     private Context mContext;
+    //存放所有图片的路径的列表
+    private List<StringBuffer> imgList = new ArrayList<>();
     private String[] IMAGE_LIST = Constants.IMAGES;//网络图片列表
     private DisplayImageOptions mOptions;//加载设置
-    public GridImageAdapter(Context context) {
-        this.mContext = context;
 
+    public GridImageAdapter(Context context, List<StringBuffer> imgList) {
+        this.mContext = context;
+        this.imgList = imgList;
         mOptions = new DisplayImageOptions.Builder()
                 .showImageOnLoading(R.drawable.ic_stub)//还没加载出来时显示的图片
                 .showImageForEmptyUri(R.drawable.ic_empty1)//无效URL加载的图片
@@ -49,45 +56,45 @@ public class GridImageAdapter extends RecyclerView.Adapter {
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
-        final GirdImageHolder imgHolder = (GirdImageHolder)holder;
+
+        final GirdImageHolder imgHolder = (GirdImageHolder) holder;
         ImageLoader.getInstance()
-                .displayImage(IMAGE_LIST[position],imgHolder.imgView,mOptions,new SimpleImageLoadingListener() {
+                .displayImage(imgList.get(position).toString(), imgHolder.imgView, mOptions, new SimpleImageLoadingListener() {
                     @Override
                     public void onLoadingStarted(String imageUri, View view) {
-                        imgHolder.imgProgress.setProgress(0);
-                        imgHolder.imgProgress.setVisibility(View.VISIBLE);
+
                     }
 
                     @Override
                     public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-                        imgHolder.imgProgress.setVisibility(View.GONE);
+
                     }
 
                     @Override
                     public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                        imgHolder.imgProgress.setVisibility(View.GONE);
+
                     }
                 }, new ImageLoadingProgressListener() {
                     @Override
                     public void onProgressUpdate(String imageUri, View view, int current, int total) {
-                        imgHolder.imgProgress.setProgress(Math.round(100.0f * current / total));
+
                     }
                 });
     }
 
     @Override
     public int getItemCount() {
-        return 0;
+        return IMAGE_LIST.length;
     }
 
     class GirdImageHolder extends RecyclerView.ViewHolder {
         public ImageView imgView;
-        public ProgressBar imgProgress;
+
 
         public GirdImageHolder(View itemView) {
             super(itemView);
             imgView = (ImageView) itemView.findViewById(R.id.img_item);
-            imgProgress = (ProgressBar) itemView.findViewById(R.id.progress);
+
         }
     }
 }
