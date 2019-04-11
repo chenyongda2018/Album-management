@@ -8,6 +8,7 @@ import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,6 +19,7 @@ import com.example.cyd.albummanager.Bean.ImageBean;
 import com.example.cyd.albummanager.Bean.ImageGroup;
 import com.example.cyd.albummanager.R;
 import com.example.cyd.albummanager.adapter.GridImageAdapter;
+import com.truizlop.sectionedrecyclerview.SectionedSpanSizeLookup;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -36,14 +38,14 @@ public class LoadAlbumFragment extends Fragment {
     private GridImageAdapter mImageAdapter;
 
     //存放所有图片的路径的列表
-    private List<StringBuffer> imgList = new ArrayList<>();
-    private List<ImageGroup> imageGroups = new ArrayList<>();
+    private List<ImageBean> imgList = new ArrayList<>();
+    private List<ImageGroup> imageGroups  = new ArrayList<>();
 
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        initAllImgInThePhone();
+
     }
 
     @Override
@@ -56,10 +58,17 @@ public class LoadAlbumFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_load_album, container, false);
         //设置布局
-        mImageAdapter = new GridImageAdapter(getContext(), imgList);
+
+        mImageAdapter = new GridImageAdapter(getContext(), imageGroups);
+        initAllImgInThePhone();
         mImgRecyclerView = (RecyclerView) rootView.findViewById(R.id.grid_recy_view);
+        mImgRecyclerView.setHasFixedSize(true);
+
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 3);
+        SectionedSpanSizeLookup lookup = new SectionedSpanSizeLookup(mImageAdapter,gridLayoutManager);
+        gridLayoutManager.setSpanSizeLookup(lookup);
         mImgRecyclerView.setLayoutManager(gridLayoutManager);
+
         mImgRecyclerView.setAdapter(mImageAdapter);
 
         return rootView;
@@ -95,7 +104,7 @@ public class LoadAlbumFragment extends Fragment {
         Cursor cursor = getContext().getContentResolver().query(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, where, whereArgs,
                 MediaStore.Images.Media.DATE_MODIFIED + " desc ");
-        Set<String> dateSet = new TreeSet<>();//存日期,因为照片按分组
+        List<String> dateList = new ArrayList<>();//存日期,因为照片按分组
         while (cursor.moveToNext()) {
             byte[] data = cursor.getBlob(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
             String dataStr = new String(data, 0, data.length - 1);//图片在手机里的路径
@@ -105,15 +114,33 @@ public class LoadAlbumFragment extends Fragment {
             String dateStr = sdf.format(time); // 2019-04-10
             StringBuffer imgPath = new StringBuffer("file://").append(dataStr);
             ImageBean bean = new ImageBean(dataStr, dateStr, imgPath.toString());
-            imgList.add(imgPath);
-            if (!dateSet.contains(dateStr)) {
-                dateSet.add(dateStr);
+            imgList.add(bean);
+            if (!dateList.contains(dateStr)) {
+                dateList.add(dateStr);
             }
+        }
 
+        for (String str : dateList) {
+            ImageGroup group = new ImageGroup(str);
+            List<ImageBean> beans = new ArrayList<>();
+
+            for (ImageBean bean : imgList) {
+                if(bean.getDate().equals(str)) {
+                    beans.add(bean);
+                }
+            }
+            group.setImageBeanList(beans);
+            imageGroups.add(group);
         }
-        for (String str : dateSet) {
-            Log.d(TAG, str);
+        mImageAdapter.notifyDataSetChanged();
+
+
+        for (ImageGroup group : imageGroups) {
+            if (group.getImageBeanList().isEmpty()) {
+                Log.d(TAG,group.getDateHeader());
+            }
         }
+
 
 
     }

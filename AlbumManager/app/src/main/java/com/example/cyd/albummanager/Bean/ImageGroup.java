@@ -10,6 +10,10 @@ public class ImageGroup {
     private String dateHeader;
     private List<ImageBean> imageBeanList;
 
+    public ImageGroup(String dateHeader) {
+        this.dateHeader = dateHeader;
+    }
+
     public ImageGroup(String dateHeader, List<ImageBean> imageBeanList) {
         this.dateHeader = dateHeader;
         this.imageBeanList = imageBeanList;
