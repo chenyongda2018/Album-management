@@ -14,11 +14,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.cyd.albummanager.Bean.ImageBean;
+import com.example.cyd.albummanager.Bean.ImageGroup;
 import com.example.cyd.albummanager.R;
 import com.example.cyd.albummanager.adapter.GridImageAdapter;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class LoadAlbumFragment extends Fragment {
     public static final String TAG = LoadAlbumFragment.class.getSimpleName();
@@ -28,6 +37,7 @@ public class LoadAlbumFragment extends Fragment {
 
     //存放所有图片的路径的列表
     private List<StringBuffer> imgList = new ArrayList<>();
+    private List<ImageGroup> imageGroups = new ArrayList<>();
 
 
     @Override
@@ -85,12 +95,24 @@ public class LoadAlbumFragment extends Fragment {
         Cursor cursor = getContext().getContentResolver().query(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, where, whereArgs,
                 MediaStore.Images.Media.DATE_MODIFIED + " desc ");
+        Set<String> dateSet = new TreeSet<>();//存日期,因为照片按分组
         while (cursor.moveToNext()) {
             byte[] data = cursor.getBlob(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-            String dataStr = new String(data, 0, data.length - 1);
+            String dataStr = new String(data, 0, data.length - 1);//图片在手机里的路径
+            File file = new File(dataStr);
+            long time = file.lastModified(); //记录此图片的上次修改时间
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String dateStr = sdf.format(time); // 2019-04-10
             StringBuffer imgPath = new StringBuffer("file://").append(dataStr);
+            ImageBean bean = new ImageBean(dataStr, dateStr, imgPath.toString());
             imgList.add(imgPath);
-            Log.d(TAG, imgPath.toString());
+            if (!dateSet.contains(dateStr)) {
+                dateSet.add(dateStr);
+            }
+
+        }
+        for (String str : dateSet) {
+            Log.d(TAG, str);
         }
 
 

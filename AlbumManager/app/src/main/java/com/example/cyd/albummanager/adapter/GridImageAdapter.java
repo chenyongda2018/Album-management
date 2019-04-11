@@ -17,6 +17,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+import com.truizlop.sectionedrecyclerview.SectionedRecyclerViewAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,7 @@ import java.util.List;
  * Created by cyd on 19-4-8.
  */
 
-public class GridImageAdapter extends RecyclerView.Adapter {
+public class GridImageAdapter extends SectionedRecyclerViewAdapter {
     private static final String TAG = GridImageAdapter.class.getSimpleName();
     private Context mContext;
     //存放所有图片的路径的列表
@@ -83,8 +84,53 @@ public class GridImageAdapter extends RecyclerView.Adapter {
     }
 
     @Override
+    protected int getSectionCount() {
+        return 0;
+    }
+
+    @Override
+    protected int getItemCountForSection(int section) {
+        return 0;
+    }
+
+    @Override
+    protected boolean hasFooterInSection(int section) {
+        return false;
+    }
+
+    @Override
+    protected RecyclerView.ViewHolder onCreateSectionHeaderViewHolder(ViewGroup parent, int viewType) {
+        return null;
+    }
+
+    @Override
+    protected RecyclerView.ViewHolder onCreateSectionFooterViewHolder(ViewGroup parent, int viewType) {
+        return null;
+    }
+
+    @Override
+    protected RecyclerView.ViewHolder onCreateItemViewHolder(ViewGroup parent, int viewType) {
+        return null;
+    }
+
+    @Override
+    protected void onBindSectionHeaderViewHolder(RecyclerView.ViewHolder holder, int section) {
+
+    }
+
+    @Override
+    protected void onBindSectionFooterViewHolder(RecyclerView.ViewHolder holder, int section) {
+
+    }
+
+    @Override
+    protected void onBindItemViewHolder(RecyclerView.ViewHolder holder, int section, int position) {
+
+    }
+
+    @Override
     public int getItemCount() {
-        return IMAGE_LIST.length;
+        return imgList.size();
     }
 
     class GirdImageHolder extends RecyclerView.ViewHolder {
